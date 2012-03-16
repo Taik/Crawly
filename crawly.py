@@ -24,7 +24,6 @@ log = logging.getLogger('crawly')
 
 class Crawly(object):
     # Based on gcrawler
-
     def __init__(self, start_urls = [], timeout = 2, worker_count = 10, pipeline_size = 100, csv_file = None):
         self.timeout         = timeout
         self.count           = worker_count
@@ -46,7 +45,7 @@ class Crawly(object):
         else:
             self.csv_file = None
 
-
+    # Utilize this method to add new URLs to be parsed, do not manually add items to in_queue!
     def add_request(self, req):
         if isinstance(req, basestring):
             req = Request(req)
@@ -96,14 +95,6 @@ class Crawly(object):
                 else:
                     log.info("No workers left, shutting down!")
                     return self.shutdown()
-
-            # Check to make sure we did not already visit this URL
-            # if req in self.seen_requests:
-            #     if req.
-            #     log.debug("Request already handled: %s" % (req))
-            #     return
-            # else:
-            #     self.seen_requests.add(req)
 
             # Check to make sure the request URL falls under our allowed domains
             if any(urlsplit(req.url).hostname == domain for domain in self.allowed_domains) is False:
@@ -169,7 +160,4 @@ class Crawly(object):
 
 
     def write_csv(self, item):
-        print "OK"
-
-urls = ['http://appworld.blackberry.com/webstore/content/42040/?lang=en', 'http://appworld.blackberry.com/webstore/content/42040/?lang=en']
-Crawly(urls).start()
+        pass
