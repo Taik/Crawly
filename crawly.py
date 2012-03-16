@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-# https://gist.github.com/996120
-
+# Heavily based on https://gist.github.com/996120
 import os
 import sys
 import csv
-
-from UserDict import DictMixin # Item wrapper
 
 import requests
 from urlparse import urlsplit, urljoin
 import lxml.html
 
+from item import Item
+from request import Request
+from response import Response
 
 import gevent
 from gevent import monkey, queue, Greenlet, pool, event
@@ -20,81 +20,6 @@ import traceback
 import logging
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger('crawly')
-
-
-# Request class
-class Request(object):
-    def __init__(self, url, meta=None, method='GET'):
-        self.url    = url
-        self.method = method
-        self.meta   = meta
-
-    def __hash__(self):
-        return hash(self.url)
-
-    def __cmp__(self, other):
-        return cmp(hash(self), hash(other))
-
-    def __repr__(self):
-        return '<Request: %s (%s)>' % (
-            self.url,
-            'done: %d bytes' % len(self.response.data) if hasattr(self, 'response') else 'pending',
-        )
-
-# Response class wrapper
-class Response(object):
-    def __init__(self, resp):
-        self.data        = resp.content
-        self.status_code = resp.status_code
-        self._response   = resp
-
-
-# Placeholder for required fields in the Item() class.
-class Field(object):
-    pass
-
-# Item class -- taken from Scrapy
-class BaseItem(object):
-    pass
-
-class DictItem(DictMixin, BaseItem):
-    fields = {}
-
-    def __init__(self):
-        self._values = {}
-
-    def __getitem__(self, key):
-        return self._values[key]
-
-    def __setitem__(self, key, value):
-        if key in self.fields:
-            self._values[key] = value
-        else:
-            raise KeyError("%s does not support field: %s" % (self.__class__.__name__, key))
-
-    def __delitem__(self, key):
-        del self._values[key]
-
-    def __getattr__(self, name):
-        if name in self.fields:
-            raise AttributeError("Use item[%r] to get field value" % name)
-        raise AttributeError(name)
-
-    def __setattr__(self, name, value):
-        if not name.startswith('_'):
-            raise AttributeError("Use item[%r] = %r to set field value" % (name, value))
-        super(DictItem, self).__setattr__(name, value)
-
-    def keys(self):
-        return self._values.keys()
-
-    def __repr__(self):
-        return '<Item: %s>' % self._values
-
-
-class Item(BaseItem):
-    title = Field()
-    description = Field()
 
 
 class Crawly(object):
